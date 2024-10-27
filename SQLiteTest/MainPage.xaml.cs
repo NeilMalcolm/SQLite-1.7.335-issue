@@ -4,18 +4,22 @@ namespace SQLiteTest
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
+        const string DatabasePassword = "password";
+        readonly static string DatabaseFileName
+            = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "db.db");
+
+        MySQLite.SQLiteConnection conn;
 
         public MainPage()
         {
             InitializeComponent();
         }
 
-        readonly static string DatabaseFileName 
-            = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "db.db");
-        
-        MySQLite.SQLiteConnection conn;
-
+        /// <summary>
+        /// Creates a new database after deleting any existing database.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CreateDatabase(object sender, EventArgs e)
         {
             try
@@ -28,7 +32,8 @@ namespace SQLiteTest
 
                 var options = new MySQLite.SQLiteConnectionString(DatabaseFileName,
                     storeDateTimeAsTicks: true,
-                    key: "password",
+                    openFlags: SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.FullMutex,
+                    key: DatabasePassword,
                     postKeyAction: db => db.Execute("PRAGMA cipher_compatibility = 3;")
                 );
 
@@ -41,13 +46,19 @@ namespace SQLiteTest
             }
         }
 
+        /// <summary>
+        /// Open the database with the DB password
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OpenDatabase(object sender, EventArgs e)
         {
             try
             {
                 var options = new SQLiteConnectionString(DatabaseFileName,
                     storeDateTimeAsTicks: true,
-                    key: "password",
+                    openFlags: SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.FullMutex,
+                    key: DatabasePassword,
                     postKeyAction: c =>  c.Execute("PRAGMA cipher_compatibility = 3")
                 );
 
@@ -60,6 +71,11 @@ namespace SQLiteTest
             }
         }
 
+        /// <summary>
+        /// Tries to open the Database without a password. If encryption worked, this won't.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TryOpenDatabaseWithoutPassword(object sender, EventArgs e)
         {
             try
@@ -67,7 +83,7 @@ namespace SQLiteTest
                 var options = new SQLiteConnectionString(DatabaseFileName,
                     storeDateTimeAsTicks: true);
 
-                conn.Close();
+                conn?.Close();
                 conn = null;
                 conn = new SQLiteConnection(options);
             }
@@ -76,6 +92,12 @@ namespace SQLiteTest
                 SetLabelAfterAction($"Failed to open DB without password. Exception:{Environment.NewLine}'{ex}'", false);
             }
         }
+
+        /// <summary>
+        /// Adds a record to the database.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CreateDatabaseRecord(object sender, EventArgs e)
         {
             try
@@ -94,11 +116,16 @@ namespace SQLiteTest
             }
         }
 
-        private void SetInfoLabel(string message)
-        {
-            InfoLabel.Text = message;
-        }
-
+        /// <summary>
+        /// Set text for the appropriate label.
+        /// </summary>
+        /// <param name="message">
+        /// The new label text.
+        /// </param>
+        /// <param name="success">
+        /// Determines whether the message shown is displayed as 
+        /// success or failure.
+        /// </param>
         private void SetLabelAfterAction(string message, bool success)
         {
             InfoLabel.Text = "";
@@ -108,6 +135,11 @@ namespace SQLiteTest
             var labelToSet = success ? SuccessLabel : ExceptionLabel;
 
             labelToSet.Text = message;
+        }
+
+        private void SetInfoLabel(string message)
+        {
+            InfoLabel.Text = message;
         }
     }
 
