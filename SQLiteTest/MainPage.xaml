@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SQLiteTest.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Button Text="Create Database"
+                    Clicked="CreateDatabase"/>
+            
+            <Button Text="Open Database"
+                    Clicked="OpenDatabase"/>
+
+            <Button Text="Try Open Database"
+                    Clicked="TryOpenDatabaseWithoutPassword"/>
+            
+            <Button Text="Create Record"
+                    Clicked="CreateDatabaseRecord"/>
+
+            <HorizontalStackLayout>
+                <Label x:Name="InfoLabel"
+                       TextColor="Black"/>
+
+                <Label x:Name="ExceptionLabel"
+                       TextColor="Red"/>
+
+                <Label x:Name="SuccessLabel"
+                       TextColor="Green"/>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
